@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -25,13 +27,18 @@ func main() {
 		panic(err)
 	}
 	secret := strings.ReplaceAll(string(secretBytes), "\n", "")
-	fmt.Println(string(secret))
+
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
+	prompt := scanner.Text()
+	fmt.Println("Using ChatGPT prompt from STDIN:", prompt)
 
 	// Construct the request body
+	// TODO(derwiki) use ChatGPTCompletionsRequest struct
 	requestBody := map[string]interface{}{
 		"model":      "text-davinci-003",
-		"prompt":     "Write a one paragraph teaser for an original Sherlock Holmes stories",
-		"max_tokens": 100,
+		"prompt":     prompt,
+		"max_tokens": 300,
 	}
 	requestBodyBytes, err := json.Marshal(requestBody)
 	if err != nil {
@@ -42,6 +49,7 @@ func main() {
 	client := &http.Client{}
 
 	// Create a new HTTP request
+	//fmt.Println("requestBodyBytes", string(requestBodyBytes))
 	request, err := http.NewRequest("POST", "https://api.openai.com/v1/completions", bytes.NewBuffer(requestBodyBytes))
 	if err != nil {
 		panic(err)
@@ -65,5 +73,6 @@ func main() {
 	}
 
 	// Print the generated response
+	//fmt.Println(responseBody)
 	fmt.Println(responseBody.Choices[0].Text)
 }
