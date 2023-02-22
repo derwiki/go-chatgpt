@@ -9,6 +9,16 @@ import (
 	"strings"
 )
 
+type ChatGPTCompletionsResponse struct {
+	Choices []ChatGPTCompletionsResponseChoice `json:"choices"`
+}
+type ChatGPTCompletionsResponseChoice struct {
+	FinishReason string `json:"finish_reason""`
+	Index        int    `json:"index""`
+	LogProbs     string `json:"logprobs""`
+	Text         string `json:"text""`
+}
+
 func main() {
 	secretBytes, err := ioutil.ReadFile("./.openai_key")
 	if err != nil {
@@ -46,16 +56,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	// fmt.Println(fmt.Sprintln("Response:\n%s", response))
 
 	// Read the response body
-	var responseBody map[string]interface{}
+	var responseBody ChatGPTCompletionsResponse
 	err = json.NewDecoder(response.Body).Decode(&responseBody)
 	if err != nil {
 		panic(err)
 	}
 
 	// Print the generated response
-	fmt.Println(responseBody["choices"]) // .([]interface{})[0].(map[string]interface{})["text"])
-	fmt.Println(responseBody["text"])    // .([]interface{})[0].(map[string]interface{})["text"])
+	fmt.Println(responseBody.Choices[0].Text)
 }
