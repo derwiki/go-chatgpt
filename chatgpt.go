@@ -20,6 +20,11 @@ type ChatGPTCompletionsResponseChoice struct {
 	LogProbs     string `json:"logprobs""`
 	Text         string `json:"text""`
 }
+type ChatGPTCompletionsRequest struct {
+	Model     string `json:"model""`
+	Prompt    string `json:"prompt""`
+	MaxTokens int    `json:"max_tokens""`
+}
 
 func main() {
 	secretBytes, err := ioutil.ReadFile("./.openai_key")
@@ -35,12 +40,12 @@ func main() {
 
 	// Construct the request body
 	// TODO(derwiki) use ChatGPTCompletionsRequest struct
-	requestBody := map[string]interface{}{
-		"model":      "text-davinci-003",
-		"prompt":     prompt,
-		"max_tokens": 300,
+	chatGPTCompletionsRequest := ChatGPTCompletionsRequest{
+		Model:     "text-davinci-003",
+		Prompt:    prompt,
+		MaxTokens: 300,
 	}
-	requestBodyBytes, err := json.Marshal(requestBody)
+	requestBodyBytes, err := json.Marshal(chatGPTCompletionsRequest)
 	if err != nil {
 		panic(err)
 	}
