@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -40,10 +41,14 @@ func main() {
 
 	// Construct the request body
 	// TODO(derwiki) use ChatGPTCompletionsRequest struct
+	maxTokens, err := strconv.Atoi(os.Getenv("MAX_TOKENS"))
+	if err != nil {
+		maxTokens = 100
+	}
 	chatGPTCompletionsRequest := ChatGPTCompletionsRequest{
 		Model:     "text-davinci-003",
 		Prompt:    prompt,
-		MaxTokens: 300,
+		MaxTokens: maxTokens,
 	}
 	requestBodyBytes, err := json.Marshal(chatGPTCompletionsRequest)
 	if err != nil {
