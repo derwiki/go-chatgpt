@@ -4,10 +4,19 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 func main() {
+	secretBytes, err := ioutil.ReadFile("./.openai_key")
+	if err != nil {
+		panic(err)
+	}
+	secret := strings.ReplaceAll(string(secretBytes), "\n", "")
+	fmt.Println(string(secret))
+
 	// Construct the request body
 	requestBody := map[string]interface{}{
 		"model":      "text-davinci-003",
@@ -29,7 +38,7 @@ func main() {
 	}
 
 	// Set the authorization header using your API key
-	request.Header.Set("Authorization", "Bearer ")
+	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", secret))
 	request.Header.Set("Content-Type", "application/json")
 
 	// Send the HTTP request to the API endpoint
@@ -37,7 +46,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(fmt.Sprintln("Response:\n%s", response))
+	// fmt.Println(fmt.Sprintln("Response:\n%s", response))
 
 	// Read the response body
 	var responseBody map[string]interface{}
