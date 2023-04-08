@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 )
 
 type ChatGPTCompletionsResponse struct {
@@ -27,13 +26,23 @@ type ChatGPTCompletionsRequest struct {
 	MaxTokens int    `json:"max_tokens""`
 }
 
-func main() {
+// LoadApiKey it's not reading this correctly
+func LoadApiKey() string {
+	maybeFromEnv := os.Getenv("OPENAI_API_KEY")
+	if len(maybeFromEnv) > 0 {
+		fmt.Println(fmt.Sprintf("using API key from env var: %s", maybeFromEnv))
+		return maybeFromEnv
+	}
 	secretBytes, err := ioutil.ReadFile("./.openai_key")
 	if err != nil {
-		panic(err)
+		fmt.Println(fmt.Sprintf("using API key from ./.openai_key: %s", string(secretBytes)))
+		return string(secretBytes)
 	}
-	secret := strings.ReplaceAll(string(secretBytes), "\n", "")
 
+	panic("no api key")
+}
+
+func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Scan()
 	prompt := scanner.Text()
@@ -65,7 +74,7 @@ func main() {
 	}
 
 	// Set the authorization header using your API key
-	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", secret))
+	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", LoadApiKey()))
 	request.Header.Set("Content-Type", "application/json")
 
 	// Send the HTTP request to the API endpoint
