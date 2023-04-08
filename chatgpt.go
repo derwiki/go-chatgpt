@@ -43,7 +43,7 @@ func loadConfig() Config {
 	if apiKey == "" {
 		apiKeyBytes, err := ioutil.ReadFile("./.openai_key")
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("Failed to read OpenAI API key file: %s", err)
 		}
 		apiKey = strings.TrimSpace(string(apiKeyBytes))
 	}
@@ -56,7 +56,7 @@ func loadConfig() Config {
 	} else {
 		maxTokens, err := strconv.Atoi(maxTokensStr)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("Invalid MAX_TOKENS value: %s", err)
 		}
 		config.MaxTokens = maxTokens
 	}
@@ -86,7 +86,7 @@ Example:
   echo "What is the capital of France?" | ./chatgpt`)
 }
 
-func gptApiCall(prompt string, config Config) string {
+func getChatGPTResponse(prompt string, config Config) string {
 	chatGPTCompletionsRequest := ChatGPTCompletionsRequest{
 		Model:     "text-davinci-003",
 		Prompt:    prompt,
@@ -115,12 +115,8 @@ func gptApiCall(prompt string, config Config) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer func() {
-		err := response.Body.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
+	// close the response body at the end of the function
+	defer response.Body.Close()
 
 	// Read the response body
 	var responseBody ChatGPTCompletionsResponse
@@ -150,13 +146,13 @@ func main() {
 	config := loadConfig()
 	if len(os.Args) > 1 {
 		fmt.Println("> Using prompt from args:", os.Args[1])
-		fmt.Println(gptApiCall(os.Args[1], config))
+		fmt.Println(getChatGPTResponse(os.Args[1], config))
 	} else if hasStdinInput() {
 		scanner := bufio.NewScanner(os.Stdin)
 		scanner.Scan()
 		prompt := scanner.Text()
 		fmt.Println("> Using prompt from STDIN:", prompt)
-		fmt.Println(gptApiCall(prompt, config))
+		fmt.Println(getChatGPTResponse(prompt, config))
 	} else {
 		fmt.Println("X No prompt found in args or STDIN")
 		printUsage()
