@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 )
 
 type ChatGPTCompletionsResponse struct {
@@ -26,38 +27,52 @@ type ChatGPTCompletionsRequest struct {
 	MaxTokens int    `json:"max_tokens""`
 }
 
-// LoadApiKey it's not reading this correctly
-func LoadApiKey() string {
-	maybeFromEnv := os.Getenv("OPENAI_API_KEY")
-	if len(maybeFromEnv) > 0 {
-		fmt.Println(fmt.Sprintf("using API key from env var: %s", maybeFromEnv))
-		return maybeFromEnv
+type Config struct {
+	OpenAIApiKey string
+	MaxTokens    int
+}
+
+func loadConfig() Config {
+	config := Config{}
+
+	// Read OpenAI API Key
+	apiKey := os.Getenv("OPENAI_API_KEY")
+	if apiKey == "" {
+		apiKeyBytes, err := ioutil.ReadFile("./.openai_key")
+		if err != nil {
+			panic(err)
+		}
+		apiKey = strings.TrimSpace(string(apiKeyBytes))
 	}
-	secretBytes, err := ioutil.ReadFile("./.openai_key")
-	if err != nil {
-		fmt.Println(fmt.Sprintf("using API key from ./.openai_key: %s", string(secretBytes)))
-		return string(secretBytes)
+	config.OpenAIApiKey = apiKey
+
+	// Read MaxTokens
+	maxTokensStr := os.Getenv("MAX_TOKENS")
+	if maxTokensStr == "" {
+		config.MaxTokens = 100
+	} else {
+		maxTokens, err := strconv.Atoi(maxTokensStr)
+		if err != nil {
+			panic(err)
+		}
+		config.MaxTokens = maxTokens
 	}
 
-	panic("no api key")
+	return config
 }
 
 func main() {
+	config := loadConfig()
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Scan()
 	prompt := scanner.Text()
 	fmt.Println("Using ChatGPT prompt from STDIN:", prompt)
 
 	// Construct the request body
-	// TODO(derwiki) use ChatGPTCompletionsRequest struct
-	maxTokens, err := strconv.Atoi(os.Getenv("MAX_TOKENS"))
-	if err != nil {
-		maxTokens = 100
-	}
 	chatGPTCompletionsRequest := ChatGPTCompletionsRequest{
 		Model:     "text-davinci-003",
 		Prompt:    prompt,
-		MaxTokens: maxTokens,
+		MaxTokens: config.MaxTokens,
 	}
 	requestBodyBytes, err := json.Marshal(chatGPTCompletionsRequest)
 	if err != nil {
@@ -74,7 +89,7 @@ func main() {
 	}
 
 	// Set the authorization header using your API key
-	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", LoadApiKey()))
+	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", config.OpenAIApiKey))
 	request.Header.Set("Content-Type", "application/json")
 
 	// Send the HTTP request to the API endpoint
