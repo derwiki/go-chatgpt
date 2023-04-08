@@ -35,57 +35,6 @@ type Config struct {
 	MaxTokens    int
 }
 
-func loadConfig() Config {
-	config := Config{}
-
-	// Read OpenAI API Key
-	apiKey := os.Getenv("OPENAI_API_KEY")
-	if apiKey == "" {
-		apiKeyBytes, err := ioutil.ReadFile("./.openai_key")
-		if err != nil {
-			log.Fatalf("Failed to read OpenAI API key file: %s", err)
-		}
-		apiKey = strings.TrimSpace(string(apiKeyBytes))
-	}
-	config.OpenAIApiKey = apiKey
-
-	// Read MaxTokens
-	maxTokensStr := os.Getenv("MAX_TOKENS")
-	if maxTokensStr == "" {
-		config.MaxTokens = 100
-	} else {
-		maxTokens, err := strconv.Atoi(maxTokensStr)
-		if err != nil {
-			log.Fatalf("Invalid MAX_TOKENS value: %s", err)
-		}
-		config.MaxTokens = maxTokens
-	}
-
-	return config
-}
-
-func printUsage() {
-	fmt.Println(`Usage:
-  ./chatgpt [PROMPT]
-  echo "PROMPT" | ./chatgpt
-
-Description:
-  A Golang client for OpenAI's ChatGPT API. This program takes a user prompt
-  as a quoted command-line argument or via the standard input (STDIN), sends
-  it to the API, and prints the generated response.
-
-Options:
-  PROMPT              The question or prompt to send to the ChatGPT API.
-
-Environment Variables:
-  OPENAI_API_KEY      Your OpenAI API key.
-  MAX_TOKENS          The maximum number of tokens to generate in the response. (default: 100)
-
-Example:
-  ./chatgpt "What is the capital of France?"
-  echo "What is the capital of France?" | ./chatgpt`)
-}
-
 func getChatGPTResponse(prompt string, config Config) string {
 	chatGPTCompletionsRequest := ChatGPTCompletionsRequest{
 		Model:     "text-davinci-003",
@@ -157,4 +106,55 @@ func main() {
 		fmt.Println("X No prompt found in args or STDIN")
 		printUsage()
 	}
+}
+
+func loadConfig() Config {
+	config := Config{}
+
+	// Read OpenAI API Key
+	apiKey := os.Getenv("OPENAI_API_KEY")
+	if apiKey == "" {
+		apiKeyBytes, err := ioutil.ReadFile("./.openai_key")
+		if err != nil {
+			log.Fatalf("Failed to read OpenAI API key file: %s", err)
+		}
+		apiKey = strings.TrimSpace(string(apiKeyBytes))
+	}
+	config.OpenAIApiKey = apiKey
+
+	// Read MaxTokens
+	maxTokensStr := os.Getenv("MAX_TOKENS")
+	if maxTokensStr == "" {
+		config.MaxTokens = 100
+	} else {
+		maxTokens, err := strconv.Atoi(maxTokensStr)
+		if err != nil {
+			log.Fatalf("Invalid MAX_TOKENS value: %s", err)
+		}
+		config.MaxTokens = maxTokens
+	}
+
+	return config
+}
+
+func printUsage() {
+	fmt.Println(`Usage:
+  ./chatgpt [PROMPT]
+  echo "PROMPT" | ./chatgpt
+
+Description:
+  A Golang client for OpenAI's ChatGPT API. This program takes a user prompt
+  as a quoted command-line argument or via the standard input (STDIN), sends
+  it to the API, and prints the generated response.
+
+Options:
+  PROMPT              The question or prompt to send to the ChatGPT API.
+
+Environment Variables:
+  OPENAI_API_KEY      Your OpenAI API key.
+  MAX_TOKENS          The maximum number of tokens to generate in the response. (default: 100)
+
+Example:
+  ./chatgpt "What is the capital of France?"
+  echo "What is the capital of France?" | ./chatgpt`)
 }
