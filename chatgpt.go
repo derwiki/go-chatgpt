@@ -19,15 +19,15 @@ type ChatGPTCompletionsResponse struct {
 	Choices []ChatGPTCompletionsResponseChoice `json:"choices"`
 }
 type ChatGPTCompletionsResponseChoice struct {
-	FinishReason string `json:"finish_reason""`
-	Index        int    `json:"index""`
-	LogProbs     string `json:"logprobs""`
-	Text         string `json:"text""`
+	FinishReason string `json:"finish_reason"`
+	Index        int    `json:"index"`
+	LogProbs     string `json:"logprobs"`
+	Text         string `json:"text"`
 }
 type ChatGPTCompletionsRequest struct {
-	Model     string `json:"model""`
-	Prompt    string `json:"prompt""`
-	MaxTokens int    `json:"max_tokens""`
+	Model     string `json:"model"`
+	Prompt    string `json:"prompt"`
+	MaxTokens int    `json:"max_tokens"`
 }
 
 type Config struct {
