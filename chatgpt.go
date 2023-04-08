@@ -59,7 +59,6 @@ func main() {
 	client := &http.Client{}
 
 	// Create a new HTTP request
-	//fmt.Println("requestBodyBytes", string(requestBodyBytes))
 	request, err := http.NewRequest("POST", "https://api.openai.com/v1/completions", bytes.NewBuffer(requestBodyBytes))
 	if err != nil {
 		panic(err)
@@ -83,6 +82,5 @@ func main() {
 	}
 
 	// Print the generated response
-	//fmt.Println(responseBody)
 	fmt.Println(responseBody.Choices[0].Text)
 }
