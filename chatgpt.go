@@ -61,14 +61,29 @@ func loadConfig() Config {
 	return config
 }
 
-func main() {
-	config := loadConfig()
-	scanner := bufio.NewScanner(os.Stdin)
-	scanner.Scan()
-	prompt := scanner.Text()
-	fmt.Println("Using ChatGPT prompt from STDIN:", prompt)
+func printUsage() {
+	fmt.Println(`Usage:
+  ./chatgpt [PROMPT]
+  echo "PROMPT" | ./chatgpt
 
-	// Construct the request body
+Description:
+  A Golang client for OpenAI's ChatGPT API. This program takes a user prompt
+  as a quoted command-line argument or via the standard input (STDIN), sends
+  it to the API, and prints the generated response.
+
+Options:
+  PROMPT              The question or prompt to send to the ChatGPT API.
+
+Environment Variables:
+  OPENAI_API_KEY      Your OpenAI API key.
+  MAX_TOKENS          The maximum number of tokens to generate in the response. (default: 100)
+
+Example:
+  ./chatgpt "What is the capital of France?"
+  echo "What is the capital of France?" | ./chatgpt`)
+}
+
+func gptApiCall(prompt string, config Config) string {
 	chatGPTCompletionsRequest := ChatGPTCompletionsRequest{
 		Model:     "text-davinci-003",
 		Prompt:    prompt,
@@ -105,6 +120,32 @@ func main() {
 		panic(err)
 	}
 
-	// Print the generated response
-	fmt.Println(responseBody.Choices[0].Text)
+	// Return the generated response
+	return strings.TrimSpace(responseBody.Choices[0].Text)
+}
+
+func hasStdinInput() bool {
+	info, err := os.Stdin.Stat()
+	if err != nil {
+		panic(err)
+	}
+
+	return info.Mode()&os.ModeCharDevice == 0
+}
+
+func main() {
+	config := loadConfig()
+	if len(os.Args) > 1 {
+		fmt.Println("> Using prompt from args:", os.Args[1])
+		fmt.Println(gptApiCall(os.Args[1], config))
+	} else if hasStdinInput() {
+		scanner := bufio.NewScanner(os.Stdin)
+		scanner.Scan()
+		prompt := scanner.Text()
+		fmt.Println("> Using prompt from STDIN:", prompt)
+		fmt.Println(gptApiCall(prompt, config))
+	} else {
+		fmt.Println("X No prompt found in args or STDIN")
+		printUsage()
+	}
 }
