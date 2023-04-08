@@ -6,11 +6,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 )
+
+const apiBaseURL = "https://api.openai.com/v1/completions"
 
 type ChatGPTCompletionsResponse struct {
 	Choices []ChatGPTCompletionsResponseChoice `json:"choices"`
@@ -40,7 +43,7 @@ func loadConfig() Config {
 	if apiKey == "" {
 		apiKeyBytes, err := ioutil.ReadFile("./.openai_key")
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 		apiKey = strings.TrimSpace(string(apiKeyBytes))
 	}
@@ -53,7 +56,7 @@ func loadConfig() Config {
 	} else {
 		maxTokens, err := strconv.Atoi(maxTokensStr)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 		config.MaxTokens = maxTokens
 	}
@@ -91,16 +94,16 @@ func gptApiCall(prompt string, config Config) string {
 	}
 	requestBodyBytes, err := json.Marshal(chatGPTCompletionsRequest)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	// Create a new HTTP client
 	client := &http.Client{}
 
 	// Create a new HTTP request
-	request, err := http.NewRequest("POST", "https://api.openai.com/v1/completions", bytes.NewBuffer(requestBodyBytes))
+	request, err := http.NewRequest("POST", apiBaseURL, bytes.NewBuffer(requestBodyBytes))
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	// Set the authorization header using your API key
@@ -110,14 +113,24 @@ func gptApiCall(prompt string, config Config) string {
 	// Send the HTTP request to the API endpoint
 	response, err := client.Do(request)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
+	defer func() {
+		err := response.Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	// Read the response body
 	var responseBody ChatGPTCompletionsResponse
 	err = json.NewDecoder(response.Body).Decode(&responseBody)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
+	}
+
+	if len(responseBody.Choices) == 0 {
+		log.Fatal("No choices found in the response body.")
 	}
 
 	// Return the generated response
@@ -127,7 +140,7 @@ func gptApiCall(prompt string, config Config) string {
 func hasStdinInput() bool {
 	info, err := os.Stdin.Stat()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	return info.Mode()&os.ModeCharDevice == 0
