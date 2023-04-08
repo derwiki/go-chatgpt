@@ -16,9 +16,14 @@ Navigate to the project directory:
 
     cd go-chatgpt
 
-Create a .openai_key file in the project directory and paste your OpenAI API key inside:
+Set your OpenAI API key either by creating a .openai_key file in the project directory and pasting your API key inside:
 
     echo "your_openai_api_key" > ./.openai_key
+
+Or by setting the OPENAI_API_KEY environment variable:
+
+    export OPENAI_API_KEY=your_openai_api_key
+
 
 ## Usage
 
@@ -26,8 +31,11 @@ Build the program:
 
     go build chatgpt.go
 
-Run the compiled binary, providing the user prompt as input:
+Run the compiled binary, providing the prompt as a command-line argument:
 
+    ./chatgpt-client "Your prompt here"
+
+Or, provide the prompt via STDIN::
 
     echo "Your prompt here" | ./chatgpt-client
 
