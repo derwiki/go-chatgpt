@@ -98,8 +98,15 @@ func main() {
 		fmt.Println(getChatGPTResponse(os.Args[1], config))
 	} else if hasStdinInput() {
 		scanner := bufio.NewScanner(os.Stdin)
-		scanner.Scan()
-		prompt := scanner.Text()
+
+		scanner.Split(bufio.ScanBytes)
+		var buffer bytes.Buffer
+		for scanner.Scan() {
+			buffer.Write(scanner.Bytes())
+		}
+
+		// Trim any leading or trailing whitespace.
+		prompt := strings.TrimSpace(buffer.String())
 		fmt.Println("> Using prompt from STDIN:", prompt)
 		fmt.Println(getChatGPTResponse(prompt, config))
 	} else {
