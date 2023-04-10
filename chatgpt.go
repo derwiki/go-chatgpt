@@ -92,8 +92,10 @@ func hasStdinInput() bool {
 }
 
 func main() {
-	config := loadConfig()
-	if len(os.Args) > 1 {
+	config, err := loadConfig()
+	if err != nil {
+		fmt.Println("Fatal error occurred in loadConfig")
+	} else if len(os.Args) > 1 {
 		fmt.Println("> Using prompt from args:", os.Args[1])
 		fmt.Println(getChatGPTResponse(os.Args[1], config))
 	} else if hasStdinInput() {
@@ -109,13 +111,14 @@ func main() {
 		prompt := strings.TrimSpace(buffer.String())
 		fmt.Println("> Using prompt from STDIN:", prompt)
 		fmt.Println(getChatGPTResponse(prompt, config))
+		fmt.Println(getChatCompletions(prompt, config))
 	} else {
 		fmt.Println("X No prompt found in args or STDIN")
 		printUsage()
 	}
 }
 
-func loadConfig() Config {
+func loadConfig() (Config, error) {
 	config := Config{}
 
 	// Read OpenAI API Key
@@ -123,7 +126,7 @@ func loadConfig() Config {
 	if apiKey == "" {
 		apiKeyBytes, err := ioutil.ReadFile("./.openai_key")
 		if err != nil {
-			log.Fatalf("Failed to read OpenAI API key file: %s", err)
+			return config, err
 		}
 		apiKey = strings.TrimSpace(string(apiKeyBytes))
 	}
@@ -136,12 +139,12 @@ func loadConfig() Config {
 	} else {
 		maxTokens, err := strconv.Atoi(maxTokensStr)
 		if err != nil {
-			log.Fatalf("Invalid MAX_TOKENS value: %s", err)
+			return config, err
 		}
 		config.MaxTokens = maxTokens
 	}
 
-	return config
+	return config, nil
 }
 
 func printUsage() {
