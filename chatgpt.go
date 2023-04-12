@@ -78,7 +78,6 @@ func getChatGPTResponse(prompt string, config Config) string {
 	return strings.TrimSpace(responseBody.Choices[0].Text)
 }
 
-
 func getChatCompletions(content string, config Config) string {
 	client := openai.NewClient(config.OpenAIApiKey)
 	resp, err := client.CreateChatCompletion(
@@ -129,7 +128,9 @@ func main() {
 
 		prompt := strings.TrimSpace(buffer.String())
 		fmt.Println("> Using prompt from STDIN:", prompt)
+		fmt.Println("> Chat Completion (gpt-3.5-turbo):", prompt)
 		fmt.Println(getChatCompletions(prompt, config))
+		fmt.Println("> Text Completion (da-vinci-002):", prompt)
 		fmt.Println(getChatGPTResponse(prompt, config))
 	} else {
 		fmt.Println("X No prompt found in args or STDIN")
