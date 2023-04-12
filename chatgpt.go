@@ -168,6 +168,10 @@ func main() {
 		fmt.Println("\n> Text Completion (da-vinci-002):", prompt)
 		fmt.Println(textDavinci002Res)
 
+		refine := fmt.Sprintf("Which of the following answers is best? \n\n%s\n\n%s\n\n%s\n\n%s", gpt3TurboRes, gpt3Davinci003Res, gpt3Davinci002Res, textDavinci002Res)
+		refined := getChatCompletions(refine, config, openai.GPT3Dot5Turbo)
+		fmt.Println("\n> Which of those answers is best?")
+		fmt.Println(refined)
 	} else {
 		fmt.Println("X No prompt found in args or STDIN")
 		printUsage()
