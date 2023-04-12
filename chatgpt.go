@@ -3,8 +3,10 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	openai "github.com/sashabaranov/go-openai"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -46,20 +48,16 @@ func getChatGPTResponse(prompt string, config Config) string {
 		log.Fatal(err)
 	}
 
-	// Create a new HTTP client
 	client := &http.Client{}
 
-	// Create a new HTTP request
 	request, err := http.NewRequest("POST", apiBaseURL, bytes.NewBuffer(requestBodyBytes))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Set the authorization header using your API key
 	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", config.OpenAIApiKey))
 	request.Header.Set("Content-Type", "application/json")
 
-	// Send the HTTP request to the API endpoint
 	response, err := client.Do(request)
 	if err != nil {
 		log.Fatal(err)
@@ -67,7 +65,6 @@ func getChatGPTResponse(prompt string, config Config) string {
 	// close the response body at the end of the function
 	defer response.Body.Close()
 
-	// Read the response body
 	var responseBody ChatGPTCompletionsResponse
 	err = json.NewDecoder(response.Body).Decode(&responseBody)
 	if err != nil {
@@ -78,8 +75,31 @@ func getChatGPTResponse(prompt string, config Config) string {
 		log.Fatal("No choices found in the response body.")
 	}
 
-	// Return the generated response
 	return strings.TrimSpace(responseBody.Choices[0].Text)
+}
+
+
+func getChatCompletions(content string, config Config) string {
+	client := openai.NewClient(config.OpenAIApiKey)
+	resp, err := client.CreateChatCompletion(
+		context.Background(),
+		openai.ChatCompletionRequest{
+			Model: openai.GPT3Dot5Turbo,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: content,
+				},
+			},
+		},
+	)
+
+	if err != nil {
+		fmt.Printf("ChatCompletion error: %v\n", err)
+		return ""
+	}
+
+	return resp.Choices[0].Message.Content
 }
 
 func hasStdinInput() bool {
@@ -107,11 +127,10 @@ func main() {
 			buffer.Write(scanner.Bytes())
 		}
 
-		// Trim any leading or trailing whitespace.
 		prompt := strings.TrimSpace(buffer.String())
 		fmt.Println("> Using prompt from STDIN:", prompt)
-		fmt.Println(getChatGPTResponse(prompt, config))
 		fmt.Println(getChatCompletions(prompt, config))
+		fmt.Println(getChatGPTResponse(prompt, config))
 	} else {
 		fmt.Println("X No prompt found in args or STDIN")
 		printUsage()
@@ -121,7 +140,6 @@ func main() {
 func loadConfig() (Config, error) {
 	config := Config{}
 
-	// Read OpenAI API Key
 	apiKey := os.Getenv("OPENAI_API_KEY")
 	if apiKey == "" {
 		apiKeyBytes, err := ioutil.ReadFile("./.openai_key")
@@ -132,7 +150,6 @@ func loadConfig() (Config, error) {
 	}
 	config.OpenAIApiKey = apiKey
 
-	// Read MaxTokens
 	maxTokensStr := os.Getenv("MAX_TOKENS")
 	if maxTokensStr == "" {
 		config.MaxTokens = 100
