@@ -131,11 +131,43 @@ func main() {
 		}
 
 		prompt := strings.TrimSpace(buffer.String())
-		fmt.Println("> Using prompt from STDIN:", prompt)
-		fmt.Println("> Chat Completion (gpt-3.5-turbo):", prompt)
-		fmt.Println(getChatCompletions(prompt, config))
-		fmt.Println("> Text Completion (da-vinci-002):", prompt)
-		fmt.Println(getChatGPTResponse(prompt, config))
+
+		// Create channels for the API responses
+		gpt3TurboCh := make(chan string)
+		gpt3Davinci003Ch := make(chan string)
+		gpt3Davinci002Ch := make(chan string)
+		textDavinci002Ch := make(chan string)
+
+		// Launch goroutines to call the API functions in parallel
+		go func() {
+			gpt3TurboCh <- getChatCompletions(prompt, config, openai.GPT3Dot5Turbo)
+		}()
+		go func() {
+			gpt3Davinci003Ch <- getChatCompletions(prompt, config, openai.GPT3TextDavinci003)
+		}()
+		go func() {
+			gpt3Davinci002Ch <- getChatCompletions(prompt, config, openai.GPT3TextDavinci002)
+		}()
+		go func() {
+			textDavinci002Ch <- getTextCompletion(prompt, config)
+		}()
+
+		// Wait for the API responses from the channels
+		gpt3TurboRes := <-gpt3TurboCh
+		gpt3Davinci003Res := <-gpt3Davinci003Ch
+		gpt3Davinci002Res := <-gpt3Davinci002Ch
+		textDavinci002Res := <-textDavinci002Ch
+
+		// Print the API responses
+		fmt.Println("\n> Chat Completion (gpt-3.5-turbo):", prompt)
+		fmt.Println(gpt3TurboRes)
+		fmt.Println("\n> Chat Completion (text-davinci-003):", prompt)
+		fmt.Println(gpt3Davinci003Res)
+		fmt.Println("\n> Chat Completion (text-davinci-002):", prompt)
+		fmt.Println(gpt3Davinci002Res)
+		fmt.Println("\n> Text Completion (da-vinci-002):", prompt)
+		fmt.Println(textDavinci002Res)
+
 	} else {
 		fmt.Println("X No prompt found in args or STDIN")
 		printUsage()
