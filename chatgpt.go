@@ -17,7 +17,7 @@ import (
 
 const apiBaseURL = "https://api.openai.com/v1/completions"
 
-type ChatGPTCompletionsResponse struct {
+type TextCompletionResponse struct {
 	Choices []ChatGPTCompletionsResponseChoice `json:"choices"`
 }
 type ChatGPTCompletionsResponseChoice struct {
@@ -37,13 +37,13 @@ type Config struct {
 	MaxTokens    int
 }
 
-func getChatGPTResponse(prompt string, config Config) string {
-	chatGPTCompletionsRequest := ChatGPTCompletionsRequest{
+func getTextCompletion(prompt string, config Config) string {
+	textCompletionRequest := ChatGPTCompletionsRequest{
 		Model:     "text-davinci-003",
 		Prompt:    prompt,
 		MaxTokens: config.MaxTokens,
 	}
-	requestBodyBytes, err := json.Marshal(chatGPTCompletionsRequest)
+	requestBodyBytes, err := json.Marshal(textCompletionRequest)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -65,7 +65,7 @@ func getChatGPTResponse(prompt string, config Config) string {
 	// close the response body at the end of the function
 	defer response.Body.Close()
 
-	var responseBody ChatGPTCompletionsResponse
+	var responseBody TextCompletionResponse
 	err = json.NewDecoder(response.Body).Decode(&responseBody)
 	if err != nil {
 		log.Fatal(err)
@@ -78,7 +78,11 @@ func getChatGPTResponse(prompt string, config Config) string {
 	return strings.TrimSpace(responseBody.Choices[0].Text)
 }
 
-func getChatCompletions(content string, config Config) string {
+func getChatCompletions(content string, config Config, model string) string {
+	if model == "" {
+		model = openai.GPT3Dot5Turbo
+	}
+	// TODO(derwiki) assert model exists in openai package
 	client := openai.NewClient(config.OpenAIApiKey)
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
@@ -116,7 +120,7 @@ func main() {
 		fmt.Println("Fatal error occurred in loadConfig")
 	} else if len(os.Args) > 1 {
 		fmt.Println("> Using prompt from args:", os.Args[1])
-		fmt.Println(getChatGPTResponse(os.Args[1], config))
+		fmt.Println(getTextCompletion(os.Args[1], config))
 	} else if hasStdinInput() {
 		scanner := bufio.NewScanner(os.Stdin)
 
