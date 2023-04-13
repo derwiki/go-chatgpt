@@ -36,6 +36,7 @@ type Config struct {
 	OpenAIApiKey string
 	MaxTokens    int
 	PromptPrefix string
+	Model        string
 }
 
 func getTextCompletion(prompt string, config Config) string {
@@ -145,6 +146,20 @@ func main() {
 	gpt3Davinci002Ch := make(chan string)
 	textDavinci002Ch := make(chan string)
 
+	// if a model is specified, only call that model and exit
+	if config.Model != "" {
+		if config.Model == openai.GPT3Dot5Turbo {
+			fmt.Println(getChatCompletions(prompt, config, openai.GPT3Dot5Turbo))
+		} else if config.Model == openai.GPT3TextDavinci003 {
+			fmt.Println(getChatCompletions(prompt, config, openai.GPT3TextDavinci003))
+		} else if config.Model == openai.GPT3TextDavinci002 {
+			fmt.Println(getChatCompletions(prompt, config, openai.GPT3TextDavinci002))
+		} else if config.Model == "text-davinci-002" {
+			fmt.Println(getTextCompletion(prompt, config))
+		}
+		return
+	}
+
 	// Launch goroutines to call the API functions in parallel
 	go func() {
 		gpt3TurboCh <- getChatCompletions(prompt, config, openai.GPT3Dot5Turbo)
@@ -211,6 +226,8 @@ func loadConfig() (Config, error) {
 		}
 		config.MaxTokens = maxTokens
 	}
+
+	config.Model = os.Getenv("GPT_MODEL")
 
 	return config, nil
 }
