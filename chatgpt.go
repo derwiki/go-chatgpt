@@ -35,12 +35,13 @@ type ChatGPTCompletionsRequest struct {
 type Config struct {
 	OpenAIApiKey string
 	MaxTokens    int
+	PromptPrefix string
 }
 
 func getTextCompletion(prompt string, config Config) string {
 	textCompletionRequest := ChatGPTCompletionsRequest{
 		Model:     "text-davinci-003",
-		Prompt:    prompt,
+		Prompt:    config.PromptPrefix + prompt,
 		MaxTokens: config.MaxTokens,
 	}
 	requestBodyBytes, err := json.Marshal(textCompletionRequest)
