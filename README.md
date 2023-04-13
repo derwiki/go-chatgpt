@@ -6,7 +6,7 @@ and then sends all the responses to chatgpt-3.5-turbo to ask which is best.
 
 ## Example
 
-```shell
+```
 ➜  go-chatgpt git:(main) ✗ ./chatgpt "What is the meaning of life?"
 
 > Chat Completion (gpt-3.5-turbo):
@@ -85,7 +85,7 @@ Defines the maximum number of tokens to generate in the response. The default va
 
 Defines a prefix that is prepended to any prompts sent to the API. Mostly useful when data is coming in on STDIN and you
 want to add instructions preceding, e.g.:
-```shell
+```
 ➜  go-chatgpt git:(main) ✗ cat chatgpt.go | PROMPT_PREFIX="Suggest improvements for this Go program: " ./chatgpt
 
 > Chat Completion (gpt-3.5-turbo):
