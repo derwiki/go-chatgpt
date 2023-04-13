@@ -92,7 +92,7 @@ func getChatCompletions(content string, config Config, model string) string {
 			Messages: []openai.ChatCompletionMessage{
 				{
 					Role:    openai.ChatMessageRoleUser,
-					Content: content,
+					Content: config.PromptPrefix + content,
 				},
 			},
 		},
@@ -117,11 +117,12 @@ func hasStdinInput() bool {
 
 func main() {
 	config, err := loadConfig()
+
+	var prompt string
 	if err != nil {
-		fmt.Println("Fatal error occurred in loadConfig")
+		fmt.Println("error: Fatal occurred in loadConfig")
 	} else if len(os.Args) > 1 {
-		fmt.Println("> Using prompt from args:", os.Args[1])
-		fmt.Println(getTextCompletion(os.Args[1], config))
+		prompt = os.Args[1]
 	} else if hasStdinInput() {
 		scanner := bufio.NewScanner(os.Stdin)
 
@@ -131,52 +132,57 @@ func main() {
 			buffer.Write(scanner.Bytes())
 		}
 
-		prompt := strings.TrimSpace(buffer.String())
-
-		// Create channels for the API responses
-		gpt3TurboCh := make(chan string)
-		gpt3Davinci003Ch := make(chan string)
-		gpt3Davinci002Ch := make(chan string)
-		textDavinci002Ch := make(chan string)
-
-		// Launch goroutines to call the API functions in parallel
-		go func() {
-			gpt3TurboCh <- getChatCompletions(prompt, config, openai.GPT3Dot5Turbo)
-		}()
-		go func() {
-			gpt3Davinci003Ch <- getChatCompletions(prompt, config, openai.GPT3TextDavinci003)
-		}()
-		go func() {
-			gpt3Davinci002Ch <- getChatCompletions(prompt, config, openai.GPT3TextDavinci002)
-		}()
-		go func() {
-			textDavinci002Ch <- getTextCompletion(prompt, config)
-		}()
-
-		// Wait for the API responses from the channels
-		gpt3TurboRes := <-gpt3TurboCh
-		gpt3Davinci003Res := <-gpt3Davinci003Ch
-		gpt3Davinci002Res := <-gpt3Davinci002Ch
-		textDavinci002Res := <-textDavinci002Ch
-
-		// Print the API responses
-		fmt.Println("\n> Chat Completion (gpt-3.5-turbo):", prompt)
-		fmt.Println(gpt3TurboRes)
-		fmt.Println("\n> Chat Completion (text-davinci-003):", prompt)
-		fmt.Println(gpt3Davinci003Res)
-		fmt.Println("\n> Chat Completion (text-davinci-002):", prompt)
-		fmt.Println(gpt3Davinci002Res)
-		fmt.Println("\n> Text Completion (da-vinci-002):", prompt)
-		fmt.Println(textDavinci002Res)
-
-		refine := fmt.Sprintf("Which of the following answers is best? \n\n%s\n\n%s\n\n%s\n\n%s", gpt3TurboRes, gpt3Davinci003Res, gpt3Davinci002Res, textDavinci002Res)
-		refined := getChatCompletions(refine, config, openai.GPT3Dot5Turbo)
-		fmt.Println("\n> Which of those answers is best?")
-		fmt.Println(refined)
+		prompt = strings.TrimSpace(buffer.String())
 	} else {
-		fmt.Println("X No prompt found in args or STDIN")
+		fmt.Println("error: No prompt found in args or STDIN")
 		printUsage()
 	}
+
+	// Create channels for the API responses
+	gpt3TurboCh := make(chan string)
+	gpt3Davinci003Ch := make(chan string)
+	gpt3Davinci002Ch := make(chan string)
+	textDavinci002Ch := make(chan string)
+
+	// Launch goroutines to call the API functions in parallel
+	go func() {
+		gpt3TurboCh <- getChatCompletions(prompt, config, openai.GPT3Dot5Turbo)
+	}()
+	go func() {
+		gpt3Davinci003Ch <- getChatCompletions(prompt, config, openai.GPT3TextDavinci003)
+	}()
+	go func() {
+		gpt3Davinci002Ch <- getChatCompletions(prompt, config, openai.GPT3TextDavinci002)
+	}()
+	go func() {
+		textDavinci002Ch <- getTextCompletion(prompt, config)
+	}()
+
+	// Wait for the API responses from the channels
+	gpt3TurboRes := <-gpt3TurboCh
+	gpt3Davinci003Res := <-gpt3Davinci003Ch
+	gpt3Davinci002Res := <-gpt3Davinci002Ch
+	textDavinci002Res := <-textDavinci002Ch
+
+	// TODO(derwiki) put this in config
+	verbose := false
+	if verbose {
+		fmt.Println(prompt)
+	}
+	// Print the API responses
+	fmt.Println("\n> Chat Completion (gpt-3.5-turbo):")
+	fmt.Println(gpt3TurboRes)
+	fmt.Println("\n> Chat Completion (text-davinci-003):")
+	fmt.Println(gpt3Davinci003Res)
+	fmt.Println("\n> Chat Completion (text-davinci-002):")
+	fmt.Println(gpt3Davinci002Res)
+	fmt.Println("\n> Text Completion (da-vinci-002):")
+	fmt.Println(textDavinci002Res)
+
+	refine := fmt.Sprintf("Which of the following answers is best? \n\n%s\n\n%s\n\n%s\n\n%s", gpt3TurboRes, gpt3Davinci003Res, gpt3Davinci002Res, textDavinci002Res)
+	refined := getChatCompletions(refine, config, openai.GPT3Dot5Turbo)
+	fmt.Println("\n> Which of those answers is best?")
+	fmt.Println(refined)
 }
 
 func loadConfig() (Config, error) {
