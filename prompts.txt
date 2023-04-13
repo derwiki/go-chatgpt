@@ -1,0 +1,2 @@
+cat chatgpt.go | PROMPT_PREFIX="Generate a README.md for this Golang CLI tool. Make sure to include a) description b) example c) how to build d) how to use, including different environment variable options and e) how to contribute" ./chatgpt
+cat chatgpt.go | PROMPT_PREFIX="Create a usage string to be printed for this program if run with invalid arguments. Make sure you include how to use PROMPT_PREFIX: " ./chatgpt
