@@ -188,6 +188,8 @@ func main() {
 func loadConfig() (Config, error) {
 	config := Config{}
 
+	config.PromptPrefix = os.Getenv("PROMPT_PREFIX")
+
 	apiKey := os.Getenv("OPENAI_API_KEY")
 	if apiKey == "" {
 		apiKeyBytes, err := ioutil.ReadFile("./.openai_key")
