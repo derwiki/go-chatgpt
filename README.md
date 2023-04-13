@@ -1,4 +1,4 @@
-# ChatGPT
+# OpenAI ChatGPT Command Line Interface
 
 A Go command-line interface to communicate with OpenAI's ChatGPT API.
 This program sends a prompt or question to the ChatGPT API for several models, prints the generated response for each,
