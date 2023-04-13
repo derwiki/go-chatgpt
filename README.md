@@ -10,19 +10,45 @@ and then sends all the responses to chatgpt-3.5-turbo to ask which is best.
 ➜  go-chatgpt git:(main) ✗ ./chatgpt "What is the meaning of life?"
 
 > Chat Completion (gpt-3.5-turbo):
-As an AI language model, I don't have a personal belief on the meaning of life. However, the meaning of life is a philosophical question that has baffled humans for centuries. It is a subjective concept that varies from person to person. Some may believe that the meaning of life is to pursue happiness and pleasure, while others may believe it to be a spiritual or religious pursuit. Ultimately, the meaning of life is personal and can only be determined by the individual.
+As an AI language model, I don't have a personal belief on the meaning of life.
+However, the meaning of life is a philosophical question that has baffled humans
+for centuries. It is a subjective concept that varies from person to person. Some
+may believe that the meaning of life is to pursue happiness and pleasure, while
+others may believe it to be a spiritual or religious pursuit. Ultimately, the
+meaning of life is personal and can only be determined by the individual.
 
 > Chat Completion (text-davinci-003):
-As an AI language model, I don't have personal beliefs and values, so I cannot hold my own meaning of life. The meaning of life can vary from person to person, and it's a philosophical and existential question that has been asked for centuries by philosophers, scientists, and spiritual leaders. Some believe it is to pursue happiness and personal fulfillment, others believe it is to fulfill a God-given purpose, while others see it as simply to exist and experience the universe around us.
+As an AI language model, I don't have personal beliefs and values, so I cannot
+hold my own meaning of life. The meaning of life can vary from person to person,
+and it's a philosophical and existential question that has been asked for
+centuries by philosophers, scientists, and spiritual leaders. Some believe it is
+to pursue happiness and personal fulfillment, others believe it is to fulfill a
+God-given purpose, while others see it as simply to exist and experience the
+universe around us.
 
 > Chat Completion (text-davinci-002):
-As an AI language model, I am incapable of having personal beliefs or opinions. However, the meaning of life is a highly debated philosophical and existential question that has no single, definitive answer. Different people may have different beliefs, interpretations, and perspectives regarding the purpose, significance, and value of life. Some may find meaning in spirituality, religion, or personal goals, while others may focus on human connection, experiences, or the pursuit of happiness. Ultimately, the meaning of life is a subjective and complex concept that may vary for each individual.
+As an AI language model, I am incapable of having personal beliefs or opinions.
+However, the meaning of life is a highly debated philosophical and existential
+question that has no single, definitive answer. Different people may have
+different beliefs, interpretations, and perspectives regarding the purpose,
+significance, and value of life. Some may find meaning in spirituality, religion,
+or personal goals, while others may focus on human connection, experiences, or
+the pursuit of happiness. Ultimately, the meaning of life is a subjective and
+complex concept that may vary for each individual.
 
 > Text Completion (da-vinci-002):
-This is an individual question that each person has to answer for themselves. There is no one-size-fits-all answer to this question. Everyone has their own perspectives and interpretations, and it is these individual perspectives that help give our lives meaning. Ultimately, it is up to you to decide what the meaning of life is for you.
+This is an individual question that each person has to answer for themselves.
+There is no one-size-fits-all answer to this question. Everyone has their own
+perspectives and interpretations, and it is these individual perspectives that
+help give our lives meaning. Ultimately, it is up to you to decide what the
+meaning of life is for you.
 
 > Which of those answers is best?
-All three answers provide good perspectives on the meaning of life, but the last one is the best because it emphasizes the importance of individual perspective and interpretation. It also highlights that there is no one definitive answer to this question and that it's up to each person to decide for themselves what the meaning of life is.
+All three answers provide good perspectives on the meaning of life, but the last
+one is the best because it emphasizes the importance of individual perspective
+and interpretation. It also highlights that there is no one definitive answer to
+this question and that it's up to each person to decide for themselves what the
+meaning of life is.
 ```
 
 ## Build
