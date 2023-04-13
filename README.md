@@ -81,6 +81,9 @@ This variable is used to authenticate your OpenAI API key. If this variable is n
 #### `MAX_TOKENS`
 Defines the maximum number of tokens to generate in the response. The default value is `100`.
 
+#### `GPT_MODEL`
+Specify a single model to use for completions.5-turbo model. If not specified, all models will be used concurrently.
+
 #### `PROMPT_PREFIX`
 
 Defines a prefix that is prepended to any prompts sent to the API. Mostly useful when data is coming in on STDIN and you

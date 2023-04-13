@@ -252,6 +252,7 @@ Environment Variables:
   OPENAI_API_KEY      Your OpenAI API key.
   MAX_TOKENS          The maximum number of tokens to generate in the response. (default: 100)
   PROMPT_PREFIX       A prefix to add to each prompt.
+  GPT_MODEL           The model to use. If not specified, all models will be used.
 
 Example:
   ./chatgpt "What is the capital of France?"
