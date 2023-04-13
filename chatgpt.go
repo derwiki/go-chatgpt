@@ -136,6 +136,7 @@ func main() {
 	} else {
 		fmt.Println("error: No prompt found in args or STDIN")
 		printUsage()
+		return
 	}
 
 	// Create channels for the API responses
@@ -215,23 +216,44 @@ func loadConfig() (Config, error) {
 }
 
 func printUsage() {
-	fmt.Println(`Usage:
+	fmt.Println(`
+Usage:
   ./chatgpt [PROMPT]
   echo "PROMPT" | ./chatgpt
+  cat chatgpt.go | PROMPT_PREFIX="Improve this program" ./chatgpt
 
 Description:
-  A Golang client for OpenAI's ChatGPT API. This program takes a user prompt
-  as a quoted command-line argument or via the standard input (STDIN), sends
-  it to the API, and prints the generated response.
+  A Go command-line interface to communicate with OpenAI's ChatGPT API.
+  This program sends a prompt or question to the ChatGPT API for several models,
+  prints the generated response for each, and then sends all the responses to
+  chatgpt-3.5-turbo to ask which is best.
 
-Options:
+Required Options:
   PROMPT              The question or prompt to send to the ChatGPT API.
 
 Environment Variables:
   OPENAI_API_KEY      Your OpenAI API key.
   MAX_TOKENS          The maximum number of tokens to generate in the response. (default: 100)
+  PROMPT_PREFIX       A prefix to add to each prompt.
 
 Example:
   ./chatgpt "What is the capital of France?"
-  echo "What is the capital of France?" | ./chatgpt`)
+
+  > Chat Completion (gpt-3.5-turbo):
+  The capital of France is Paris.
+
+  > Chat Completion (text-davinci-003):
+  The capital of France is Paris.
+
+  > Chat Completion (text-davinci-002):
+  The capital of France is Paris.
+
+  > Text Completion (da-vinci-002):
+  Paris.
+
+  > Which of those answers is best?
+  The first answer is the best as it includes a complete sentence and clear
+  statement of the capital of France. The other answers are incomplete sentences
+  or single words that do not provide enough information.
+	`)
 }
