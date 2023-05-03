@@ -253,7 +253,7 @@ Description:
   A Go command-line interface to communicate with OpenAI's ChatGPT API.
   This program sends a prompt or question to the ChatGPT API for several models,
   prints the generated response for each, and then sends all the responses to
-  chatgpt-3.5-turbo to ask which is best.
+  gpt-4 to ask which is best.
 
 Required Options:
   PROMPT              The question or prompt to send to the ChatGPT API.
@@ -265,23 +265,24 @@ Environment Variables:
   GPT_MODEL           The model to use. If not specified, all models will be used.
 
 Example:
-  ./chatgpt "What is the capital of France?"
+  ./chatgpt "What is the capital of Ohio?"
 
   > Chat Completion (gpt-3.5-turbo):
-  The capital of France is Paris.
+  The capital of Ohio is Columbus.
 
   > Chat Completion (text-davinci-003):
-  The capital of France is Paris.
+  The capital of Ohio is Columbus.
 
   > Chat Completion (text-davinci-002):
-  The capital of France is Paris.
+  The capital of Ohio is Columbus.
 
   > Text Completion (da-vinci-002):
-  Paris.
+  The capital of Ohio is Columbus.
+
+  > Chat Completion (gpt-4):
+  The capital of Ohio is Columbus.
 
   > Which of those answers is best?
-  The first answer is the best as it includes a complete sentence and clear
-  statement of the capital of France. The other answers are incomplete sentences
-  or single words that do not provide enough information.
+  All of the answers are the same and correct.
 	`)
 }
