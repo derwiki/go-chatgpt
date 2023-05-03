@@ -6,13 +6,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	openai "github.com/sashabaranov/go-openai"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
+
+	openai "github.com/sashabaranov/go-openai"
 )
 
 const apiBaseURL = "https://api.openai.com/v1/completions"
@@ -145,6 +146,7 @@ func main() {
 	gpt3Davinci003Ch := make(chan string)
 	gpt3Davinci002Ch := make(chan string)
 	textDavinci002Ch := make(chan string)
+	gpt4Ch := make(chan string)
 
 	// if a model is specified, only call that model and exit
 	if config.Model != "" {
@@ -156,6 +158,8 @@ func main() {
 			fmt.Println(getChatCompletions(prompt, config, openai.GPT3TextDavinci002))
 		} else if config.Model == "text-davinci-002" {
 			fmt.Println(getTextCompletion(prompt, config))
+		} else if config.Model == openai.GPT4 {
+			fmt.Println(getChatCompletions(prompt, config, openai.GPT4))
 		}
 		return
 	}
@@ -173,12 +177,16 @@ func main() {
 	go func() {
 		textDavinci002Ch <- getTextCompletion(prompt, config)
 	}()
+	go func() {
+		gpt4Ch <- getChatCompletions(prompt, config, openai.GPT4)
+	}()
 
 	// Wait for the API responses from the channels
 	gpt3TurboRes := <-gpt3TurboCh
 	gpt3Davinci003Res := <-gpt3Davinci003Ch
 	gpt3Davinci002Res := <-gpt3Davinci002Ch
 	textDavinci002Res := <-textDavinci002Ch
+	gpt4Res := <-gpt4Ch
 
 	// TODO(derwiki) put this in config
 	verbose := false
@@ -194,9 +202,11 @@ func main() {
 	fmt.Println(gpt3Davinci002Res)
 	fmt.Println("\n> Text Completion (da-vinci-002):")
 	fmt.Println(textDavinci002Res)
+	fmt.Println("\n> Chat Completion (gpt-4):")
+	fmt.Println(gpt4Res)
 
 	refine := fmt.Sprintf("Which of the following answers is best? \n\n%s\n\n%s\n\n%s\n\n%s", gpt3TurboRes, gpt3Davinci003Res, gpt3Davinci002Res, textDavinci002Res)
-	refined := getChatCompletions(refine, config, openai.GPT3Dot5Turbo)
+	refined := getChatCompletions(refine, config, openai.GPT4)
 	fmt.Println("\n> Which of those answers is best?")
 	fmt.Println(refined)
 }
